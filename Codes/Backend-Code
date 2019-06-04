@@ -87,4 +87,4 @@ for i in range(0,10):
         print(labels[i],":","%.2f"% (result[0][i]*100))
         
         
-        
+       
