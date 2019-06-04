@@ -1,0 +1,335 @@
+# Image-Recognition-CNN (Final Code) 
+
+# Importing the libraries.
+from tkinter import *
+from PIL import Image
+from PIL import ImageTk
+from tkinter import filedialog
+import cv2
+import os
+
+import numpy as np
+from keras.preprocessing import image
+from keras.models import load_model
+classifier = load_model('keras_cifar10_trained_model.h5')
+
+# Designing window for registration
+
+def register():
+    global register_screen
+    register_screen = Toplevel(main_screen)
+    register_screen.title("Register")
+    register_screen.geometry("450x275")
+    register_screen.configure(background="turquoise")
+    
+    global username
+    global Email
+    global password
+    global username_entry
+    global password_entry
+    global Email_entry
+    username = StringVar()
+    Email = StringVar()
+    password = StringVar()
+ 
+    Label(register_screen, text="Please enter details below :",fg="blue",font=("Calibri", 15, "italic"), bg="turquoise").pack()
+    Label(register_screen, text="", bg="turquoise").pack()
+    username_lable = Label(register_screen, text="Username * " ,fg="red", bg="turquoise", font=(18))
+    username_lable.pack()
+    username_entry = Entry(register_screen, textvariable=username, bd=3, width=40)
+    username_entry.pack()
+    password_lable = Label(register_screen, text="Password * ",fg="red", bg="turquoise", font=(18))
+    password_lable.pack()
+    password_entry = Entry(register_screen, textvariable=password, show='*', bd=3, width=40)
+    password_entry.pack()
+    Email_lable = Label(register_screen, text="Email ID * ",fg="red", bg="turquoise", font=(18))
+    Email_lable.pack()
+    Email_entry = Entry(register_screen, textvariable=Email, bd=3, width=40)
+    Email_entry.pack()
+    Label(register_screen, text="", bg="turquoise").pack()
+    Button(register_screen, text="Register", command = register_user, font=('helvetica', 15), width=20).pack()
+ 
+# Designing window for login 
+ 
+def login():
+    global login_screen
+    login_screen = Toplevel(main_screen)
+    login_screen.title("Login")
+    login_screen.geometry("450x275")
+    login_screen.configure(background="spring green")
+    Label(login_screen, text="Please enter details below to login :",fg="dodger blue", bg="spring green", font=("Calibri", 15, "italic")).pack()
+    Label(login_screen, text="", bg="spring green").pack()
+ 
+    global username_verify
+    global password_verify
+ 
+    username_verify = StringVar()
+    password_verify = StringVar()
+ 
+    global username_login_entry
+    global password_login_entry
+ 
+    Label(login_screen, text="Username * ",fg="red", bg="spring green", font=(18)).pack()
+    username_login_entry = Entry(login_screen, textvariable=username_verify, bd=3, width=40)
+    username_login_entry.pack()
+    Label(login_screen, text="", bg="spring green").pack()
+    Label(login_screen, text="Password * ",fg="red", bg="spring green", font=(18)).pack()
+    password_login_entry = Entry(login_screen, textvariable=password_verify, show= '*', bd=3, width=40)
+    password_login_entry.pack()
+    Label(login_screen, text="", bg="spring green").pack()
+    Button(login_screen, text="Login", command = login_verify, font=('helvetica', 15), width=20).pack()
+
+# Implementing event on register button
+
+def register_user():
+ 
+    username_info = username.get()
+    password_info = password.get()
+    Email_info = Email.get()
+ 
+    file = open(username_info, "w")
+    file.write(username_info + "\n")
+    file.write(password_info)
+    file.write(Email_info)
+    file.close()
+ 
+    username_entry.delete(0, END)
+    password_entry.delete(0, END)
+ 
+    Label(register_screen, text="Registration Success", fg="green", font=("calibri", 11)).pack()
+    
+# Implementing event on login button 
+
+def login_verify():
+    username1 = username_verify.get()
+    password1 = password_verify.get()
+    username_login_entry.delete(0, END)
+    password_login_entry.delete(0, END)
+ 
+    list_of_files = os.listdir()
+    if username1 in list_of_files:
+        file1 = open(username1, "r")
+        verify = file1.read().splitlines()
+        if password1 in verify:
+            login_success()
+        else:
+            password_not_recognised()
+    else:
+        user_not_found()
+
+# Designing popup for login success
+ 
+def login_success():
+    global login_success_screen ,panelA, panelB
+
+    login_success_screen = Toplevel(login_screen)
+    login_success_screen.title("Success")
+    login_success_screen.geometry("250x100")
+    login_success_screen.configure(background="green2")
+    Label(login_success_screen, text="Login Success !!", fg="White", bg="green2", font=('calibri', 15, "bold")).pack()
+    Label(text="", bg="green2").pack()
+    Label(text="", bg="green2").pack()
+    Button(login_success_screen, text="OK", command=delete_login_success, font=('helvetica', 12)).pack()
+
+# Designing popup for login invalid password
+ 
+def password_not_recognised():
+    global password_not_recog_screen
+    password_not_recog_screen = Toplevel(login_screen)
+    password_not_recog_screen.title("Retry")
+    password_not_recog_screen.geometry("250x100")
+    password_not_recog_screen.configure(background="red2")
+    Label(password_not_recog_screen, text="Invalid Password !!", fg="White", bg="red2", font=('calibri', 15, "bold")).pack()
+    Label(text="", bg="red2").pack()
+    Label(text="", bg="red2").pack()
+    Button(password_not_recog_screen, text="OK", command=delete_password_not_recognised, font=('helvetica', 12)).pack()
+ 
+# Designing popup for user not found
+ 
+def user_not_found():
+    global user_not_found_screen
+    user_not_found_screen = Toplevel(login_screen)
+    user_not_found_screen.title("Retry")
+    user_not_found_screen.geometry("250x100")
+    user_not_found_screen.configure(background="violet red")
+    Label(user_not_found_screen, text="User Not Found !!", fg="white", bg="violet red", font=("calibri", 15, "bold")).pack()
+    Label(text="", bg="violet red").pack()
+    Label(text="", bg="violet red").pack()
+    Button(user_not_found_screen, text="OK", command=delete_user_not_found_screen, font=('helvetica', 12)).pack()
+
+# Deleting popups
+"""
+def select_image():
+
+       
+     # grab a reference to the image panels
+	global panelA
+	panelA=None
+	
+ 
+     # open a file chooser dialog and allow the user to select an input
+	path = filedialog.askopenfilename()
+
+
+	
+     # ensure a file path was selected
+	if len(path) > 0:
+		# load the image from disk, convert it to grayscale, and detect
+		# edges in it
+		image = cv2.imread(path)
+		#gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		#edged = cv2.Canny(gray, 50, 100)
+ 
+		# OpenCV represents images in BGR order; however PIL represents
+		# images in RGB order, so we need to swap the channels
+		image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+ 
+		# convert the images to PIL format...
+		image = Image.fromarray(image)
+		#edged = Image.fromarray(edged)
+ 
+		# ...and then to ImageTk format
+		image = ImageTk.PhotoImage(image)
+		#edged = ImageTk.PhotoImage(edged)
+
+     # if the panels are None, initialize them
+		if panelA is None:
+			# the first panel will store our original image
+			panelA = Label(root,image=image)
+			panelA.image = image
+			panelA.pack(padx=10, pady=10)
+ 
+		
+		# otherwise, update the image panels
+		else:
+			# update the pannels
+			panelA.configure(image=image)
+			panelA.image = image
+"""
+def select_image():
+
+    root.destroy()
+    global panelA
+    panelA = None
+    global show_image
+    show_image = Toplevel(main_screen)
+    show_image.title("Image Recognition")
+    show_image.geometry("600x600")
+    show_image.configure(background="light goldenrod")
+   # Label(show_image, text="Please enter details below to login",fg="blue",font=("segoe script", 11)).pack()
+   # Label(show_image, text="").pack()
+    btn = Button(show_image, text="Show Prediction", bg="yellow",command=show_prediction,fg="orange red",font=('helvetica', 15,'bold'), width=20)
+    btn.pack(side="bottom", expand="yes", padx="10", pady="10")
+         
+     # grab a reference to the image panels
+	
+ 
+     # open a file chooser dialog and allow the user to select an input
+    path = filedialog.askopenfilename()
+
+
+	
+     # ensure a file path was selected
+    if len(path) > 0:
+		# load the image from disk, convert it to grayscale, and detect
+		# edges in it
+	    image = cv2.imread(path)
+		#gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		#edged = cv2.Canny(gray, 50, 100)
+ 
+		# OpenCV represents images in BGR order; however PIL represents
+		# images in RGB order, so we need to swap the channels
+	    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+ 
+		# convert the images to PIL format...
+    image = Image.fromarray(image)
+		#edged = Image.fromarray(edged)
+ 
+		# ...and then to ImageTk format
+    image = ImageTk.PhotoImage(image)
+		#edged = ImageTk.PhotoImage(edged)
+
+     # if the panels are None, initialize them
+    if panelA is None:
+			# the first panel will store our original image
+	    panelA = Label(show_image,image=image)
+	    panelA.image = image
+	    panelA.pack(padx=10, pady=10)
+ 
+		
+		# otherwise, update the image panels
+    else:
+			# update the pannels
+	    panelA.configure(image=image)
+	    panelA.image = image
+        
+def show_prediction():
+    show_image.destroy()
+    global predict
+    predict=Toplevel(main_screen)
+    predict.title("Prediction")
+    predict.geometry("300x150")
+    predict.configure(background="sea green1")
+    # Insert code for show result
+    test_image = image.load_img('truck1.jpg', target_size = (32, 32)) # Sample Image is uploaded.
+    test_image = image.img_to_array(test_image)
+    test_image = np.expand_dims(test_image, axis = 0)
+    result = classifier.predict(test_image)
+    labels=['Airplane :','Automobile :','Bird :','Cat :','Deer :','Dog :','Frog :','Horse :','Ship :','Truck :','\0']
+    for i in range(0,10):
+        if result[0][i]==1:
+            prediction=labels[i]
+            Label(predict,text=labels[i],font=("calibri",12,"bold"),fg="royal blue1",bg="sea green1").pack()
+            Label(predict,text="%.2f Percentage"%(result[0][i]*100),font=("calibri",12,"bold"),fg="royal blue1",bg="sea green1").pack()
+        elif result[0][i]<1 and result[0][i]>0:
+            Label(predict,text=labels[i],font=("calibri", 12,"bold"),fg="royal blue1",bg="sea green1").pack()
+            Label(predict,text="%.2f Percentage"%(result[0][i]*100),font=("calibri",12,"bold"),fg="royal blue1",bg="sea green1").pack()
+		    
+def delete_login_success():
+    login_success_screen.destroy()
+    login_screen.destroy()     
+    global root
+    root=Toplevel(main_screen)
+    root.title("Insert Image")
+    root.geometry("600x550")
+    root.configure(background="Orange")
+    Label(root ,text="Enter Image only in .JPG Format",fg="white",bg="Orange",font=("calibri", 13)).pack(side="bottom")
+    Label(root,text="---- ---- --- -- NOTE -- --- ---- ----",fg="red",font=("calibri",12,"bold"),bg="Orange").pack(side="bottom")   
+    # create a button, then when pressed, will trigger a file chooser
+   # dialog and allow the user to select an input image; then add the
+   # button the GUI
+    
+
+    btn = Button(root, text="Select an Image", bg="red",fg="white", command=select_image, font=('helvetica', 13, 'bold'), width=15)
+    btn.pack(side="bottom", expand="yes", padx="10", pady="10")
+    
+def delete_password_not_recognised():
+    password_not_recog_screen.destroy()
+ 
+ 
+def delete_user_not_found_screen():
+    user_not_found_screen.destroy()
+ 
+        
+# ensure a file path was selected
+
+# Designing Main(first) window
+
+def main_account_screen():
+    global main_screen
+    main_screen = Tk()
+    main_screen.geometry("500x300")
+    main_screen.title("Account Login")
+    main_screen.configure(background="Orange")
+    Label(text="IMAGE RECOGNITION", width="300", height="2", font=("Calibri", 18, "bold"), fg="dark orange").pack()
+    Label(text="", bg="orange").pack()
+    Button(text="Login", command = login, bg="dark orange1", fg="yellow", activebackground="white", font=('helvetica', 17), width=20).pack()
+    Label(text="", bg="orange").pack()
+    Button(text="Register", command=register, bg="Yellow", fg="dark orange1", activebackground="white", font=('helvetica', 17), width=20).pack()
+
+    main_screen.mainloop()
+ 
+ 
+main_account_screen()    
+    
+
